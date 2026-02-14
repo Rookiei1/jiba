@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hot-Blooded & Energetic</title>
+    <style>
+        body {
+            background-color: #ff5733; /* Vibrant color */
+            color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            animation: energy 2s infinite;
+            text-align: center;
+        }
+
+        @keyframes energy {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        h1 {
+            font-size: 3em;
+            font-weight: bold;
+            margin-top: 20%;
+            text-shadow: 2px 2px 5px #000000;
+        }
+
+        p {
+            font-size: 1.5em;
+            margin-top: 20px;
+            animation: textGlow 1.5s infinite alternate;
+        }
+
+        @keyframes textGlow {
+            from { text-shadow: 0 0 10px #ffffff; }
+            to { text-shadow: 0 0 20px #ffcc00; }
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1.2em;
+            color: #ffffff;
+            background-color: #333333;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #555555;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to the Hot-Blooded World!</h1>
+    <p>Ignite your passion and let your energy flow!</p>
+    <button>Get Started</button>
+</body>
+</html>
