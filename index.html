@@ -1,28 +1,791 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jiba Enhanced</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="script.js" defer></script>
+    <title>强者自测表 - 燃烧你的斗志！</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 10px rgba(255, 69, 0, 0.5); }
+            50% { text-shadow: 0 0 30px rgba(255, 69, 0, 1); }
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', 'Arial Black', Arial, sans-serif;
+            background: linear-gradient(-45deg, #ff2400, #ff6b35, #f7931e, #fdb833);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 30px 20px !important;
+                max-width: 100% !important;
+            }
+            
+            h1 {
+                font-size: 32px !important;
+            }
+            
+            .image-gallery {
+                gap: 10px !important;
+            }
+            
+            .gallery-item {
+                width: 120px !important;
+                height: 100px !important;
+            }
+            
+            button {
+                padding: 12px 30px !important;
+                font-size: 14px !important;
+            }
+            
+            .score {
+                font-size: 60px !important;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr 1fr !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 24px !important;
+            }
+            
+            .image-gallery {
+                flex-direction: column !important;
+                align-items: center !important;
+            }
+            
+            .gallery-item {
+                width: 100% !important;
+                max-width: 150px !important;
+            }
+            
+            .score {
+                font-size: 48px !important;
+            }
+            
+            .button-group {
+                flex-direction: column !important;
+            }
+            
+            button {
+                width: 100% !important;
+            }
+            
+            .volume-btn {
+                width: 45px !important;
+                height: 45px !important;
+            }
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(255, 69, 0, 0.4), 0 0 80px rgba(255, 107, 53, 0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 50px 40px;
+            border: 3px solid #ff4500;
+            position: relative;
+            animation: slideIn 0.8s ease;
+        }
+        
+        .control-panel {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .control-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .control-btn:hover {
+            background: #e0e0e0;
+            transform: scale(1.05);
+        }
+        
+        .control-btn.active {
+            background: #ff4500;
+            color: white;
+        }
+        
+        h1 {
+            text-align: center;
+            background: linear-gradient(135deg, #ff2400, #ff6b35, #fdb833);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            font-size: 48px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            animation: glow 2s ease-in-out infinite;
+        }
+        
+        .slogan {
+            text-align: center;
+            color: #ff4500;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .image-gallery {
+            display: flex;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .gallery-item {
+            width: 150px;
+            height: 120px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(255, 69, 0, 0.3);
+            border: 3px solid #ff4500;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .gallery-item:hover {
+            transform: scale(1.1) rotate(2deg);
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .question-block {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(255, 69, 0, 0.05), rgba(255, 107, 53, 0.05));
+            border-left: 6px solid #ff4500;
+            border-radius: 10px;
+            animation: slideIn 0.8s ease forwards;
+        }
+        
+        .question-title {
+            font-weight: 900;
+            color: #ff2400;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .question-title::before {
+            content: '🔥 ';
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .option-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 12px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            background: white;
+            border: 2px solid #ffcccc;
+            font-weight: 600;
+        }
+        
+        .option-label:hover {
+            background: #ffe0cc;
+            border-color: #ff4500;
+            transform: translateX(5px);
+        }
+        
+        .option-label input[type="radio"] {
+            margin-right: 12px;
+            accent-color: #ff4500;
+        }
+        
+        .option-label input[type="radio"]:checked + span {
+            color: #ff4500;
+            font-weight: 900;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 16px 40px;
+            font-size: 18px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #ff2400, #ff6b35);
+            color: white;
+            box-shadow: 0 10px 25px rgba(255, 69, 0, 0.4);
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255, 69, 0, 0.6);
+        }
+        
+        .reset-btn {
+            background: linear-gradient(135deg, #f7931e, #fdb833);
+            color: white;
+            box-shadow: 0 10px 25px rgba(247, 147, 30, 0.4);
+        }
+        
+        .reset-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(247, 147, 30, 0.6);
+        }
+        
+        .result {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #ff2400, #ff6b35);
+            border-radius: 15px;
+            margin-top: 30px;
+            color: white;
+        }
+        
+        .result.show {
+            display: block;
+            animation: slideIn 0.6s ease;
+        }
+        
+        .result h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            animation: glow 1.5s ease-in-out infinite;
+        }
+        
+        .result-image {
+            width: 250px;
+            height: 200px;
+            margin: 20px auto;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 3px solid white;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+        }
+        
+        .result-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .score {
+            font-size: 80px;
+            font-weight: 900;
+            margin: 30px 0;
+            animation: pulse 1s ease-in-out infinite;
+        }
+        
+        .stats-panel {
+            display: none;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(255, 69, 0, 0.1), rgba(255, 107, 53, 0.1));
+            border-radius: 15px;
+            margin-top: 20px;
+            animation: slideIn 0.6s ease;
+        }
+        
+        .stats-panel.show {
+            display: block;
+        }
+        
+        .stats-panel h3 {
+            font-size: 24px;
+            color: #ff2400;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #ff4500;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-item h4 {
+            color: #ff2400;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 900;
+            color: #ff6b35;
+        }
+        
+        .ranking-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .ranking-table th,
+        .ranking-table td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .ranking-table th {
+            background: #ff4500;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .ranking-table tr:hover {
+            background: #fff5e6;
+        }
+        
+        .volume-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .volume-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff2400, #ff6b35);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            box-shadow: 0 5px 15px rgba(255, 69, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .volume-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .share-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #ff4500;
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 15px;
+            border: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .share-btn:hover {
+            background: #ff6b35;
+            transform: scale(1.05);
+        }
+    </style>
 </head>
 <body>
+    <audio id="bgMusic" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+    
     <div class="container">
-        <header>
-            <h1>Welcome to Jiba!</h1>
-        </header>
-        <main>
-            <section id="stats-dashboard">
-                <h2>Statistics Dashboard</h2>
-                <div id="statistics"></div>
-            </section>
-            <button onclick="playSound('click')">Click Me!</button>
-        </main>
-        <audio id="background-music" loop autoplay>
-            <source src="music/background-music.mp3" type="audio/mpeg">
-            Your browser does not support the audio element.
-        </audio>
+        <div class="control-panel">
+            <button class="control-btn active" onclick="toggleSection('test')">📝 测试</button>
+            <button class="control-btn" onclick="toggleSection('stats')">📊 统计</button>
+            <button class="control-btn" id="musicBtn" onclick="toggleMusic()">🔊 音乐</button>
+            <button class="control-btn" onclick="exportData()">💾 导出</button>
+            <button class="control-btn" onclick="clearData()">🗑️ 清空</button>
+        </div>
+        
+        <div id="testSection">
+            <h1>强者自测表</h1>
+            <div class="slogan">🔥 燃烧你的斗志！挑战自我极限 🔥</div>
+            
+            <div class="image-gallery">
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1577720643272-265667c53b5a?w=300&h=300&fit=crop" alt="励志1">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1552258543-2e89c2c89916?w=300&h=300&fit=crop" alt="励志2">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=300&h=300&fit=crop" alt="励志3">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=300&h=300&fit=crop" alt="励志4">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1517836357463-d25ddfcbf042?w=300&h=300&fit=crop" alt="励志5">
+                </div>
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1538611519923-bc6a5b6d451c?w=300&h=300&fit=crop" alt="励志6">
+                </div>
+            </div>
+            
+            <form id="testForm">
+                <div class="question-block">
+                    <div class="question-title">你如何面对挫折？</div>
+                    <div class="options">
+                        <label class="option-label"><input type="radio" name="q1" value="1"><span>逃避，尽量不想</span></label>
+                        <label class="option-label"><input type="radio" name="q1" value="2"><span>感到沮丧但最终会调整</span></label>
+                        <label class="option-label"><input type="radio" name="q1" value="3"><span>积极分析原因，寻找解决方案</span></label>
+                        <label class="option-label"><input type="radio" name="q1" value="4"><span>视为学习机会，快速反弹💪</span></label>
+                    </div>
+                </div>
+                
+                <div class="question-block">
+                    <div class="question-title">你的自律程度如何？</div>
+                    <div class="options">
+                        <label class="option-label"><input type="radio" name="q2" value="1"><span>很难坚持计划</span></label>
+                        <label class="option-label"><input type="radio" name="q2" value="2"><span>大多数时候能坚持</span></label>
+                        <label class="option-label"><input type="radio" name="q2" value="3"><span>有明确的习惯和规律</span></label>
+                        <label class="option-label"><input type="radio" name="q2" value="4"><span>自律已成为本能⚡</span></label>
+                    </div>
+                </div>
+                
+                <div class="question-block">
+                    <div class="question-title">你是否持续学习和成长？</div>
+                    <div class="options">
+                        <label class="option-label"><input type="radio" name="q3" value="1"><span>很少有学习计划</span></label>
+                        <label class="option-label"><input type="radio" name="q3" value="2"><span>偶尔学习新东西</span></label>
+                        <label class="option-label"><input type="radio" name="q3" value="3"><span>定期学习和提升</span></label>
+                        <label class="option-label"><input type="radio" name="q3" value="4"><span>持续探索，深度学习🚀</span></label>
+                    </div>
+                </div>
+                
+                <div class="question-block">
+                    <div class="question-title">你如何处理人际关系？</div>
+                    <div class="options">
+                        <label class="option-label"><input type="radio" name="q4" value="1"><span>经常有冲突和误解</span></label>
+                        <label class="option-label"><input type="radio" name="q4" value="2"><span>关系一般，有时紧张</span></label>
+                        <label class="option-label"><input type="radio" name="q4" value="3"><span>建立了稳定的人脉</span></label>
+                        <label class="option-label"><input type="radio" name="q4" value="4"><span>深度连接，相互赋能👑</span></label>
+                    </div>
+                </div>
+                
+                <div class="question-block">
+                    <div class="question-title">你的目标意识如何？</div>
+                    <div class="options">
+                        <label class="option-label"><input type="radio" name="q5" value="1"><span>没有明确目标</span></label>
+                        <label class="option-label"><input type="radio" name="q5" value="2"><span>有模糊的想法</span></label>
+                        <label class="option-label"><input type="radio" name="q5" value="3"><span>有明确的长期和短期目标</span></label>
+                        <label class="option-label"><input type="radio" name="q5" value="4"><span>目标清晰，系统执行🎯</span></label>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" class="submit-btn">⚡ 提交答卷 ⚡</button>
+                    <button type="reset" class="reset-btn">🔄 重新开始</button>
+                </div>
+            </form>
+            
+            <div class="result" id="result">
+                <h2>🏆 测评结果 🏆</h2>
+                <div style="font-size: 60px; margin: 10px 0;" id="trophy"></div>
+                <div class="result-image" id="resultImage">
+                    <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=300&h=300&fit=crop" alt="成功">
+                </div>
+                <div class="score" id="scoreDisplay"></div>
+                <div style="font-size: 24px; font-weight: bold; margin: 15px 0;" id="scoreText"></div>
+                <div id="scoreDetail" style="font-size: 16px; margin: 15px 0;"></div>
+                <div style="font-size: 48px; margin: 20px 0;" id="encouragement"></div>
+                <button class="share-btn" onclick="shareResult()">📱 分享成绩</button>
+            </div>
+        </div>
+        
+        <div id="statsSection" class="stats-panel">
+            <h3>📊 强者统计数据</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h4>总测试次数</h4>
+                    <div class="stat-value" id="totalTests">0</div>
+                </div>
+                <div class="stat-item">
+                    <h4>平均分数</h4>
+                    <div class="stat-value" id="avgScore">0</div>
+                </div>
+                <div class="stat-item">
+                    <h4>最高分数</h4>
+                    <div class="stat-value" id="maxScore">0</div>
+                </div>
+            </div>
+            
+            <div style="background: white; padding: 20px; border-radius: 8px;">
+                <h4 style="color: #ff2400; margin-bottom: 15px;">🏆 历史排名榜</h4>
+                <table class="ranking-table" id="rankingTable">
+                    <thead>
+                        <tr>
+                            <th>排名</th>
+                            <th>分数</th>
+                            <th>等级</th>
+                            <th>日期</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rankingBody">
+                        <tr>
+                            <td colspan="4" style="color: #999;">暂无记录</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
+    
+    <div class="volume-control">
+        <button class="volume-btn" id="volumeBtn" onclick="toggleVolume()">🔊</button>
+    </div>
+    
+    <script>
+        const scoreDescriptions = {
+            5: { text: '初心者', encouragement: '💪你还有很大的提升空间！', trophy: '🥉' },
+            6: { text: '行动者', encouragement: '加油！坚持就会改变！', trophy: '🥉' },
+            7: { text: '进步者', encouragement: '很好！继续这样干！', trophy: '🥉' },
+            8: { text: '稳定者', encouragement: '不错！保持动力！', trophy: '🥈' },
+            9: { text: '优秀者', encouragement: '太棒了！你很接近巅峰！', trophy: '🥈' },
+            10: { text: '杰出者', encouragement: '了不起！继续深化！', trophy: '🥈' },
+            11: { text: '精英者', encouragement: '非常出色！快要成为传奇！', trophy: '🥇' },
+            12: { text: '精英强者', encouragement: '惊人！你很接近强者之巅！', trophy: '🥇' },
+            13: { text: '顶尖强者', encouragement: '卓越！向你致敬！', trophy: '👑' },
+            14: { text: '传奇强者', encouragement: '传奇级别！太强了！', trophy: '👑' },
+            15: { text: '超越者', encouragement: '超越极限！无人能挡！', trophy: '👑' },
+            16: { text: '神话者', encouragement: '神话级别！无敌是寂寞的！', trophy: '⭐' },
+            17: { text: '终极者', encouragement: '终极强者！永不言败！', trophy: '⭐' },
+            18: { text: '绝对者', encouragement: '绝对统治！你就是传奇本身！', trophy: '⭐' },
+            19: { text: '究极者', encouragement: '究极强者！诸天无敌！', trophy: '🌟' },
+            20: { text: '完美体', encouragement: '完全体强者！恭喜成神！🎊', trophy: '🌟' }
+        };
+        
+        let musicEnabled = false;
+        let testData = JSON.parse(localStorage.getItem('testData')) || [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const bgMusic = document.getElementById('bgMusic');
+            bgMusic.volume = 0.3;
+            updateStats();
+        });
+        
+        function toggleMusic() {
+            const bgMusic = document.getElementById('bgMusic');
+            const musicBtn = document.getElementById('musicBtn');
+            musicEnabled = !musicEnabled;
+            if (musicEnabled) {
+                bgMusic.play().catch(e => console.log('音乐播放失败'));
+                musicBtn.classList.add('active');
+            } else {
+                bgMusic.pause();
+                musicBtn.classList.remove('active');
+            }
+        }
+        
+        function toggleVolume() {
+            const bgMusic = document.getElementById('bgMusic');
+            if (bgMusic.volume > 0) {
+                bgMusic.volume = 0;
+                document.getElementById('volumeBtn').textContent = '🔇';
+            } else {
+                bgMusic.volume = 0.3;
+                document.getElementById('volumeBtn').textContent = '🔊';
+            }
+        }
+        
+        function toggleSection(section) {
+            document.getElementById('testSection').style.display = section === 'test' ? 'block' : 'none';
+            document.getElementById('statsSection').classList.toggle('show', section === 'stats');
+            document.querySelectorAll('.control-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            if (section === 'stats') updateStats();
+        }
+        
+        document.getElementById('testForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const answers = {};
+            for (let i = 1; i <= 5; i++) {
+                const selected = document.querySelector(`input[name="q${i}"]:checked`);
+                if (!selected) {
+                    alert('⚠️ 请完成所有题目！');
+                    return;
+                }
+                answers[`q${i}`] = parseInt(selected.value);
+            }
+            
+            playSuccessSound();
+            const totalScore = Object.values(answers).reduce((sum, val) => sum + val, 0);
+            const percentage = ((totalScore - 5) / 15 * 100).toFixed(1);
+            const desc = scoreDescriptions[totalScore];
+            
+            testData.push({ score: totalScore, level: desc.text, date: new Date().toLocaleString('zh-CN') });
+            localStorage.setItem('testData', JSON.stringify(testData));
+            
+            displayResult(totalScore, desc, percentage);
+            document.getElementById('testForm').style.display = 'none';
+            document.getElementById('result').classList.add('show');
+            
+            setTimeout(() => {
+                alert(`🔥 你的强者指数：${totalScore}/20\n${desc.text}\n${desc.encouragement}`);
+            }, 500);
+        });
+        
+        function displayResult(totalScore, desc, percentage) {
+            document.getElementById('trophy').textContent = desc.trophy;
+            document.getElementById('scoreDisplay').textContent = totalScore;
+            document.getElementById('scoreText').textContent = desc.text;
+            document.getElementById('scoreDetail').textContent = `总分：${totalScore}/20 | 强者指数：${percentage}% ⚡`;
+            document.getElementById('encouragement').textContent = desc.encouragement;
+            document.getElementById('resultImage').innerHTML = `<img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=300&h=300&fit=crop" alt="成功">`;
+        }
+        
+        document.querySelector('.reset-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('result').classList.remove('show');
+            document.getElementById('testForm').style.display = 'block';
+            document.getElementById('testForm').reset();
+        });
+        
+        function playSuccessSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.frequency.value = 800;
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch (e) {}
+        }
+        
+        function updateStats() {
+            const totalTests = testData.length;
+            const avgScore = totalTests > 0 ? (testData.reduce((sum, d) => sum + d.score, 0) / totalTests).toFixed(1) : 0;
+            const maxScore = totalTests > 0 ? Math.max(...testData.map(d => d.score)) : 0;
+            document.getElementById('totalTests').textContent = totalTests;
+            document.getElementById('avgScore').textContent = avgScore;
+            document.getElementById('maxScore').textContent = maxScore;
+            
+            const rankingBody = document.getElementById('rankingBody');
+            rankingBody.innerHTML = '';
+            if (totalTests === 0) {
+                rankingBody.innerHTML = '<tr><td colspan="4" style="color: #999;">暂无记录</td></tr>';
+            } else {
+                testData.sort((a, b) => b.score - a.score).forEach((data, index) => {
+                    const row = rankingBody.insertRow();
+                    row.innerHTML = `<td>${index + 1}</td><td><strong>${data.score}</strong></td><td>${data.level}</td><td>${data.date}</td>`;
+                });
+            }
+        }
+        
+        function shareResult() {
+            const lastScore = testData[testData.length - 1];
+            const text = `🔥 我的强者指数测试成绩：${lastScore.score}/20，等级：${lastScore.level}！你也来测试一下吧！`;
+            if (navigator.share) {
+                navigator.share({ title: '强者自测表', text });
+            } else {
+                alert(text);
+            }
+        }
+        
+        function exportData() {
+            const dataStr = JSON.stringify(testData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `强者测试数据_${new Date().toLocaleDateString()}.json`;
+            link.click();
+            alert('✅ 数据导出成功！');
+        }
+        
+        function clearData() {
+            if (confirm('⚠️ 确定要清空所有测试记录吗？此操作不可撤销！')) {
+                testData = [];
+                localStorage.clear();
+                updateStats();
+                alert('✅ 数据已清空！');
+            }
+        }
+    </script>
 </body>
 </html>
