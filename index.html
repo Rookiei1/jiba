@@ -1,1 +1,128 @@
-<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Strong Person Self-Test</title>\n    <style>\n        body {\n            margin: 0;\n            padding: 0;\n            font-family: Arial, sans-serif;\n            background: linear-gradient(45deg, #ff6b6b, #f7c6a6);\n            animation: gradient 10s ease infinite;\n            color: white;\n            text-align: center;\n        }\n        @keyframes gradient {\n            0% { background-position: 0% 50%; }\n            50% { background-position: 100% 50%; }\n            100% { background-position: 0% 50%; }\n        }\n        .glow {\n            text-shadow: 0 0 10px #ff6b6b, 0 0 20px #ff6b6b;\n        }\n        .score {\n            font-size: 4em;\n            animation: pulse 1s infinite;\n        }\n        @keyframes pulse {\n            0% { transform: scale(1); }\n            50% { transform: scale(1.1); }\n            100% { transform: scale(1); }\n        }\n        .btn {\n            background: #ff8c00;\n            color: white;\n            border: none;\n            padding: 10px 20px;\n            font-size: 1.5em;\n            border-radius: 5px;\n            cursor: pointer;\n            margin: 10px;\n            transition: transform 0.2s;\n        }\n        .btn:hover {\n            transform: scale(1.1);\n        }\n    </style>\n</head>\n<body>\n    <h1 class=\"glow\">Hot-Blooded & Energetic Strong Person Self-Test</h1>\n    <div class=\"score\">Score: <span id=\"scoreDisplay\">0</span></div>\n    <form id=\"selfTestForm\">\n        <label for=\"q1\">1. How often do you exercise? (1-5)</label>\n        <input type=\"number\" id=\"q1\" min=1 max=5 required>\n        <label for=\"q2\">2. Rate your endurance? (1-5)</label>\n        <input type=\"number\" id=\"q2\" min=1 max=5 required>\n        <label for=\"q3\">3. How competitive are you? (1-5)</label>\n        <input type=\"number\" id=\"q3\" min=1 max=5 required>\n        <button type=\"button\" class=\"btn\" onclick=\"calculateScore()\">Submit</button>\n        <div id=\"result\"></div>\n    </form>\n    <script>\n        function calculateScore() {\n            let score = 0;\n            score += parseInt(document.getElementById('q1').value) || 0;\n            score += parseInt(document.getElementById('q2').value) || 0;\n            score += parseInt(document.getElementById('q3').value) || 0;\n            document.getElementById('scoreDisplay').innerText = score;\n            displayResult(score);\n        }\n\n        function displayResult(score) {\n            let message = '';\n            if (score <= 5) {\n                message = 'Keep pushing yourself! 🚀';\n            } else if (score <= 10) {\n                message = 'You have potential! 🌟';\n            } else if (score <= 15) {\n                message = 'Great job! Keep going! 🔥';\n            } else if (score <= 20) {\n                message = 'You are a champion! 🏆';\n            } else {\n                message = 'Unlimited potential! 🥇';\n            }\n            document.getElementById('result').innerText = message;\n        }\n    </script>\n</body>\n</html>\n
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hot-Blooded Self-Test</title>
+    <style>
+        body {
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            font-family: Arial, sans-serif;
+            color: #fff;
+            text-align: center;
+            animation: glow 1s infinite alternate;
+        }
+        @keyframes glow {
+            0% { text-shadow: 0 0 5px #ffcc00, 0 0 10px #ffcc00; }
+            100% { text-shadow: 0 0 20px #ffcc00, 0 0 30px #ffcc00; }
+        }
+        .gallery {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .gallery img {
+            width: 150px;
+            margin: 10px;
+            border-radius: 10px;
+            transition: transform 0.3s;
+        }
+        .gallery img:hover {
+            transform: scale(1.1);
+        }
+        .question-block {
+            margin: 20px 0;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 10px;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hot-Blooded Self-Test</h1>
+    <div class="gallery">
+        <img src="image1.jpg" alt="Inspirational Image 1">
+        <img src="image2.jpg" alt="Inspirational Image 2">
+        <img src="image3.jpg" alt="Inspirational Image 3">
+        <img src="image4.jpg" alt="Inspirational Image 4">
+        <img src="image5.jpg" alt="Inspirational Image 5">
+        <img src="image6.jpg" alt="Inspirational Image 6">
+    </div>
+    <form id="selfTest">
+        <div class="question-block">
+            <p>Question 1: How passionate are you about your goals?</p>
+            <input type="radio" name="question1" value="1"> Not at all<br>
+            <input type="radio" name="question1" value="2"> A little<br>
+            <input type="radio" name="question1" value="3"> Somewhat<br>
+            <input type="radio" name="question1" value="4"> Very<br>
+            <input type="radio" name="question1" value="5"> Extremely<br>
+        </div>
+        <div class="question-block">
+            <p>Question 2: How do you handle challenges?</p>
+            <input type="radio" name="question2" value="1"> Avoid them<br>
+            <input type="radio" name="question2" value="2"> Face them<br>
+            <input type="radio" name="question2" value="3"> Tackle them head on<br>
+            <input type="radio" name="question2" value="4"> Turn challenges into opportunities<br>
+            <input type="radio" name="question2" value="5"> Thrive in challenges<br>
+        </div>
+        <div class="question-block">
+            <p>Question 3: What motivates you?</p>
+            <input type="radio" name="question3" value="1"> External factors<br>
+            <input type="radio" name="question3" value="2"> Personal goals<br>
+            <input type="radio" name="question3" value="3"> Support from others<br>
+            <input type="radio" name="question3" value="4"> My passion<br>
+            <input type="radio" name="question3" value="5"> My vision for success<br>
+        </div>
+        <div class="question-block">
+            <p>Question 4: How do you define success?</p>
+            <input type="radio" name="question4" value="1"> Wealth<br>
+            <input type="radio" name="question4" value="2"> Happiness<br>
+            <input type="radio" name="question4" value="3"> Achievements<br>
+            <input type="radio" name="question4" value="4"> Influence<br>
+            <input type="radio" name="question4" value="5"> Fulfillment<br>
+        </div>
+        <div class="question-block">
+            <p>Question 5: What do you do when you fail?</p>
+            <input type="radio" name="question5" value="1"> Give up<br>
+            <input type="radio" name="question5" value="2"> Learn from it<br>
+            <input type="radio" name="question5" value="3"> Try again<br>
+            <input type="radio" name="question5" value="4"> Seek advice<br>
+            <input type="radio" name="question5" value="5"> Reflect and improve<br>
+        </div>
+        <button type="button" onclick="calculateResult()">Submit</button>
+    </form>
+    <div id="result"></div>
+    <script>
+        function calculateResult() {
+            var totalScore = 0;
+            for (var i = 1; i <= 5; i++) {
+                var q = document.querySelector('input[name="question' + i + '"]:checked');
+                if (q) {
+                    totalScore += parseInt(q.value);
+                }
+            }
+            var resultText = '';
+            var resultImage = '';
+            if (totalScore <= 10) {
+                resultText = 'You need more motivation!';
+                resultImage = 'low motivation.jpg';
+            } else if (totalScore <= 20) {
+                resultText = 'You are on the right track!';
+                resultImage = 'medium motivation.jpg';
+            } else if (totalScore <= 30) {
+                resultText = 'Excellent! Keep pushing forward!';
+                resultImage = 'high motivation.jpg';
+            } else {
+                resultText = 'You are a true inspiration!';
+                resultImage = 'ultra motivation.jpg';
+            }
+            document.getElementById('result').innerHTML = '<p>' + resultText + '</p><img src="' + resultImage + '" alt="Result Image">';
+        }
+    </script>
+</body>
+</html>
