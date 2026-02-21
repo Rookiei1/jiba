@@ -1,2 +1,408 @@
-��Һ� �㿪����ɵ�� ������
-<iframe name="myIFrame" scrolling="yes" width="103%" height="100%" style="border: solid #cd1818;"></iframe>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>星域守卫战 - 静态网页大型游戏</title>
+  <style>
+    :root {
+      --bg: #050816;
+      --panel: #0d1432cc;
+      --line: #2e4f9fcc;
+      --text: #eaf1ff;
+      --good: #6bffb2;
+      --warn: #ffd166;
+      --bad: #ff6b8a;
+      --accent: #74b3ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background: radial-gradient(circle at 20% 10%, #18204e 0, #070a1d 45%, #04050f 100%);
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 12px;
+      padding: 12px;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 0 0 1px #12205033 inset, 0 10px 30px #0007;
+    }
+    aside { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+    h1 { margin: 0 0 6px; font-size: 1.2rem; color: #cde0ff; }
+    .stat { font-size: 0.92rem; display: flex; justify-content: space-between; margin: 4px 0; }
+    .bar { height: 10px; border-radius: 999px; background: #0a1026; overflow: hidden; border: 1px solid #1f3576; }
+    .bar > i { display: block; height: 100%; background: linear-gradient(90deg, #53e7a7, #8dffc6); width: 40%; }
+    .btn-grid { display: grid; gap: 8px; }
+    button {
+      border: 1px solid #4f7fe9;
+      color: #eaf3ff;
+      background: linear-gradient(180deg, #3563c4, #24489a);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      padding: 8px 10px;
+      text-align: left;
+      cursor: pointer;
+    }
+    button:disabled { opacity: .4; cursor: not-allowed; }
+    .hint { font-size: 0.82rem; color: #9fb9ef; line-height: 1.5; }
+    #log {
+      background: #020513cc;
+      border: 1px solid #1b2d63;
+      border-radius: 8px;
+      padding: 6px;
+      height: 120px;
+      overflow: auto;
+      font-size: 0.8rem;
+      line-height: 1.35;
+      color: #c5d9ff;
+    }
+    .main { display: grid; grid-template-rows: auto 1fr auto; gap: 10px; }
+    .top {
+      display: flex; gap: 10px; align-items: center; justify-content: space-between;
+      padding: 10px 14px;
+    }
+    .chip { border: 1px solid #3a5ea9; background: #122152c9; border-radius: 999px; padding: 4px 10px; font-size: .82rem; }
+    canvas { width: 100%; height: 100%; background: linear-gradient(180deg, #090f2a, #050815 65%, #070413); border-radius: 10px; display:block; }
+    .footer { font-size: .82rem; color: #a8c1ef; padding: 10px 12px; }
+    b.good { color: var(--good); } b.warn { color: var(--warn); } b.bad { color: var(--bad); }
+    @media (max-width: 980px) {
+      body { grid-template-columns: 1fr; }
+      aside { order: 2; }
+      .main { min-height: 68vh; }
+    }
+  </style>
+</head>
+<body>
+  <aside class="panel">
+    <h1>🚀 星域守卫战</h1>
+    <div class="stat"><span>基地耐久</span><span id="baseHpText">1000 / 1000</span></div>
+    <div class="bar"><i id="baseHpBar"></i></div>
+    <div class="stat"><span>金属资源</span><span id="goldText">0</span></div>
+    <div class="stat"><span>波次</span><span id="waveText">1</span></div>
+    <div class="stat"><span>击毁敌舰</span><span id="killsText">0</span></div>
+    <div class="stat"><span>DPS(估算)</span><span id="dpsText">0</span></div>
+
+    <div class="btn-grid" id="upgrades"></div>
+
+    <div class="hint">
+      操作：<b>鼠标移动</b>主炮，<b>左键</b>连发，<b>空格</b>释放冲击波。<br>
+      每 5 波出现首领。生存越久敌人越强。
+    </div>
+    <div id="log"></div>
+  </aside>
+
+  <section class="main">
+    <div class="panel top">
+      <div class="chip" id="stateChip">战斗中</div>
+      <div class="chip" id="skillChip">冲击波 CD: 0.0s</div>
+      <div class="chip">静态单文件 · 无需后端</div>
+    </div>
+    <div class="panel" style="padding:10px;min-height:420px;">
+      <canvas id="game" width="1280" height="720"></canvas>
+    </div>
+    <div class="panel footer">
+      提示：这是一个纯前端“大型”静态游戏示例，包含波次系统、Boss、升级树、技能、粒子特效与自动难度提升。
+    </div>
+  </section>
+
+  <script>
+    const cvs = document.getElementById('game');
+    const ctx = cvs.getContext('2d');
+    const logEl = document.getElementById('log');
+    const ui = {
+      baseHpText: document.getElementById('baseHpText'),
+      baseHpBar: document.getElementById('baseHpBar'),
+      goldText: document.getElementById('goldText'),
+      waveText: document.getElementById('waveText'),
+      killsText: document.getElementById('killsText'),
+      dpsText: document.getElementById('dpsText'),
+      stateChip: document.getElementById('stateChip'),
+      skillChip: document.getElementById('skillChip'),
+      upgrades: document.getElementById('upgrades'),
+    };
+
+    const rand = (a,b)=>Math.random()*(b-a)+a;
+    const dist = (a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+
+    const state = {
+      t: 0, wave: 1, waveTimer: 0, baseHp: 1000, maxBaseHp:1000,
+      gold: 140, kills: 0, scoreDamage:0,
+      over: false, lastDpsSample:0,
+      mouse:{x:cvs.width/2,y:cvs.height/2,down:false},
+      player:{x:cvs.width/2,y:cvs.height*0.75,fireCd:0,fireRate:8,damage:16,bulletSpeed:600,spread:0.02,bulletSize:3,shield:0},
+      skill:{cd:0,maxCd:12},
+      enemies:[], bullets:[], enemyBullets:[], effects:[], stars:[]
+    };
+
+    for(let i=0;i<170;i++) state.stars.push({x:Math.random()*cvs.width,y:Math.random()*cvs.height,s:Math.random()*2+0.3,v:Math.random()*25+8});
+
+    const upgradeDefs = [
+      {id:'rate', name:'速射模块', base:90, level:0, desc:'提高射速', apply:()=>state.player.fireRate+=1.2, cost(){return this.base*(this.level+1);}},
+      {id:'damage', name:'高能弹头', base:110, level:0, desc:'提高伤害', apply:()=>state.player.damage+=5, cost(){return this.base*(this.level+1);}},
+      {id:'engine', name:'弹速增压', base:95, level:0, desc:'提高弹速', apply:()=>state.player.bulletSpeed+=90, cost(){return this.base*(this.level+1);}},
+      {id:'repair', name:'纳米修复', base:140, level:0, desc:'回复基地生命', apply:()=>state.baseHp=Math.min(state.maxBaseHp,state.baseHp+120), cost(){return this.base*(this.level+1);}},
+      {id:'aegis', name:'护盾发生器', base:180, level:0, desc:'减伤护盾+5%', apply:()=>state.player.shield=Math.min(0.6,state.player.shield+0.05), cost(){return this.base*(this.level+1);}},
+    ];
+
+    function log(msg){
+      const item = document.createElement('div');
+      item.textContent = `[${(state.t).toFixed(1)}] ${msg}`;
+      logEl.prepend(item);
+      while(logEl.children.length>70) logEl.removeChild(logEl.lastChild);
+    }
+
+    function renderUpgradeButtons(){
+      ui.upgrades.innerHTML='';
+      for(const u of upgradeDefs){
+        const c = Math.floor(u.cost());
+        const b = document.createElement('button');
+        b.disabled = state.gold < c || state.over;
+        b.innerHTML = `<b>${u.name} Lv.${u.level}</b><br>${u.desc} · 费用 ${c}`;
+        b.onclick = ()=>{
+          if(state.gold<c||state.over) return;
+          state.gold-=c; u.level++; u.apply(); log(`升级：${u.name} -> Lv.${u.level}`);
+          renderUpgradeButtons();
+        };
+        ui.upgrades.appendChild(b);
+      }
+    }
+
+    function spawnEnemy(boss=false){
+      const edge = Math.floor(Math.random()*4);
+      let x=0,y=0;
+      if(edge===0){x=rand(0,cvs.width);y=-20;} else if(edge===1){x=cvs.width+20;y=rand(0,cvs.height*0.8);} else if(edge===2){x=rand(0,cvs.width);y=cvs.height+20;} else {x=-20;y=rand(0,cvs.height*0.8)}
+      const scale = 1 + state.wave*0.08;
+      const hp = boss ? 420*scale : rand(50,85)*scale;
+      state.enemies.push({x,y,r:boss?26:11,hp,maxHp:hp,speed:(boss?36:rand(50,95))*(1+state.wave*0.03), damage:boss?120:24, fire: boss?rand(1.1,1.7):rand(2.4,4.2), boss});
+    }
+
+    function spawnWave(){
+      const n = 6 + Math.floor(state.wave*1.6);
+      const boss = state.wave % 5 === 0;
+      for(let i=0;i<n;i++) setTimeout(()=>spawnEnemy(false), i*120);
+      if(boss) setTimeout(()=>{spawnEnemy(true); log('⚠️ 首领跃迁进入战场！');}, n*120+500);
+      log(`第 ${state.wave} 波来袭，共 ${n}${boss?'+Boss':''} 艘敌舰。`);
+    }
+
+    function shootPlayer(dt){
+      state.player.fireCd -= dt;
+      if(!state.mouse.down || state.player.fireCd>0 || state.over) return;
+      state.player.fireCd = 1/state.player.fireRate;
+      const angle = Math.atan2(state.mouse.y-state.player.y, state.mouse.x-state.player.x);
+      for(let i=-1;i<=1;i++){
+        const a = angle + i*state.player.spread;
+        state.bullets.push({x:state.player.x,y:state.player.y,vx:Math.cos(a)*state.player.bulletSpeed,vy:Math.sin(a)*state.player.bulletSpeed,d:state.player.damage,r:state.player.bulletSize,ttl:1.3});
+      }
+    }
+
+    function blast(){
+      if(state.skill.cd>0 || state.over) return;
+      state.skill.cd = state.skill.maxCd;
+      log('释放冲击波，清理近场目标！');
+      state.effects.push({type:'ring',x:state.player.x,y:state.player.y,r:10,max:260,ttl:.65});
+      for(const e of state.enemies){
+        const dis = dist(e,state.player);
+        if(dis<280){
+          const k = (280-dis)/280;
+          e.hp -= 120*k;
+          const ang = Math.atan2(e.y-state.player.y,e.x-state.player.x);
+          e.x += Math.cos(ang)*80*k;
+          e.y += Math.sin(ang)*80*k;
+        }
+      }
+    }
+
+    function enemyShoot(e){
+      const a = Math.atan2(state.player.y-e.y,state.player.x-e.x);
+      const sp = e.boss?230:170;
+      state.enemyBullets.push({x:e.x,y:e.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,d:e.boss?24:13,r:e.boss?4:3,ttl:6});
+    }
+
+    function update(dt){
+      state.t += dt;
+      if(state.over) return;
+      state.waveTimer += dt;
+      if(state.waveTimer>13){ state.wave++; state.waveTimer=0; spawnWave(); }
+
+      shootPlayer(dt);
+      state.skill.cd = Math.max(0,state.skill.cd-dt);
+
+      for(const s of state.stars){ s.y += s.v*dt; if(s.y>cvs.height){s.y=0;s.x=Math.random()*cvs.width;} }
+
+      for(const b of state.bullets){ b.x+=b.vx*dt; b.y+=b.vy*dt; b.ttl-=dt; }
+      state.bullets = state.bullets.filter(b=>b.ttl>0 && b.x>-60&&b.x<cvs.width+60&&b.y>-60&&b.y<cvs.height+60);
+
+      for(const e of state.enemies){
+        const a = Math.atan2(state.player.y-e.y,state.player.x-e.x);
+        e.x += Math.cos(a)*e.speed*dt;
+        e.y += Math.sin(a)*e.speed*dt;
+        e.fire -= dt;
+        if(e.fire<=0){ e.fire = e.boss?rand(0.8,1.4):rand(2.2,3.7); enemyShoot(e); }
+      }
+
+      for(const eb of state.enemyBullets){ eb.x+=eb.vx*dt; eb.y+=eb.vy*dt; eb.ttl-=dt; }
+      state.enemyBullets = state.enemyBullets.filter(b=>b.ttl>0 && b.x>-80&&b.x<cvs.width+80&&b.y>-80&&b.y<cvs.height+80);
+
+      for(const b of state.bullets){
+        for(const e of state.enemies){
+          if(e.hp<=0) continue;
+          if(Math.hypot(b.x-e.x,b.y-e.y) < e.r+b.r){
+            e.hp -= b.d;
+            state.scoreDamage += b.d;
+            b.ttl = -1;
+            state.effects.push({type:'hit',x:b.x,y:b.y,ttl:.25,r:8+Math.random()*8});
+            break;
+          }
+        }
+      }
+
+      for(const e of state.enemies){
+        if(e.hp>0 && Math.hypot(e.x-state.player.x,e.y-state.player.y) < e.r+18){
+          e.hp = -999;
+          const dmg = e.damage * (1-state.player.shield);
+          state.baseHp -= dmg;
+          log(`基地受损 -${dmg.toFixed(0)} HP`);
+        }
+      }
+
+      for(const eb of state.enemyBullets){
+        if(Math.hypot(eb.x-state.player.x,eb.y-state.player.y) < eb.r+16){
+          eb.ttl = -1;
+          state.baseHp -= eb.d*(1-state.player.shield);
+          state.effects.push({type:'hit',x:eb.x,y:eb.y,ttl:.2,r:10});
+        }
+      }
+
+      let dead = 0;
+      state.enemies = state.enemies.filter(e=>{
+        if(e.hp<=0){
+          dead++; state.kills++; state.gold += e.boss?180:24;
+          state.effects.push({type:'boom',x:e.x,y:e.y,ttl:.45,r:e.boss?45:22});
+          return false;
+        }
+        return true;
+      });
+      if(dead>0) renderUpgradeButtons();
+
+      for(const ef of state.effects) ef.ttl -= dt;
+      state.effects = state.effects.filter(e=>e.ttl>0);
+
+      if(state.baseHp<=0){
+        state.baseHp = 0;
+        state.over = true;
+        ui.stateChip.textContent = '基地沦陷';
+        log('❌ 战斗结束。按 R 重新开始。');
+      }
+    }
+
+    function draw(){
+      ctx.clearRect(0,0,cvs.width,cvs.height);
+      for(const s of state.stars){
+        ctx.fillStyle = `rgba(180,210,255,${0.5+s.s*0.2})`;
+        ctx.fillRect(s.x,s.y,s.s,s.s);
+      }
+
+      ctx.strokeStyle = '#284ea5';
+      ctx.globalAlpha = 0.18;
+      for(let x=0;x<cvs.width;x+=80){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cvs.height);ctx.stroke();}
+      for(let y=0;y<cvs.height;y+=80){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(cvs.width,y);ctx.stroke();}
+      ctx.globalAlpha = 1;
+
+      for(const b of state.bullets){ ctx.fillStyle='#8fffd7'; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill(); }
+      for(const b of state.enemyBullets){ ctx.fillStyle='#ff8aa7'; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill(); }
+
+      for(const e of state.enemies){
+        ctx.save();
+        ctx.translate(e.x,e.y);
+        ctx.fillStyle = e.boss ? '#ff5f7e' : '#ff8fa8';
+        ctx.beginPath(); ctx.moveTo(e.r,0); ctx.lineTo(-e.r*0.8,e.r*0.7); ctx.lineTo(-e.r*0.8,-e.r*0.7); ctx.closePath(); ctx.fill();
+        ctx.restore();
+
+        ctx.fillStyle='#1d2450'; ctx.fillRect(e.x-e.r,e.y-e.r-9,e.r*2,5);
+        ctx.fillStyle=e.boss?'#ff5577':'#ffb2c2'; ctx.fillRect(e.x-e.r,e.y-e.r-9,e.r*2*(e.hp/e.maxHp),5);
+      }
+
+      ctx.save();
+      ctx.translate(state.player.x,state.player.y);
+      const a = Math.atan2(state.mouse.y-state.player.y,state.mouse.x-state.player.x);
+      ctx.rotate(a);
+      ctx.fillStyle = '#7fc9ff';
+      ctx.beginPath(); ctx.moveTo(20,0); ctx.lineTo(-14,12); ctx.lineTo(-8,0); ctx.lineTo(-14,-12); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#b0e8ff'; ctx.fillRect(0,-2,26,4);
+      ctx.restore();
+
+      for(const ef of state.effects){
+        if(ef.type==='ring'){
+          const p = 1-ef.ttl/.65;
+          ctx.strokeStyle=`rgba(124,209,255,${1-p})`; ctx.lineWidth=5;
+          ctx.beginPath(); ctx.arc(ef.x,ef.y,ef.max*p,0,Math.PI*2); ctx.stroke();
+        }else if(ef.type==='hit'){
+          ctx.fillStyle=`rgba(255,223,130,${ef.ttl*4})`; ctx.beginPath(); ctx.arc(ef.x,ef.y,ef.r*(1-ef.ttl),0,Math.PI*2); ctx.fill();
+        }else if(ef.type==='boom'){
+          const p = 1-ef.ttl/.45;
+          ctx.fillStyle=`rgba(255,120,150,${1-p})`; ctx.beginPath(); ctx.arc(ef.x,ef.y,ef.r*p,0,Math.PI*2); ctx.fill();
+        }
+      }
+
+      if(state.over){
+        ctx.fillStyle='rgba(0,0,0,.5)'; ctx.fillRect(0,0,cvs.width,cvs.height);
+        ctx.fillStyle='#fff'; ctx.font='bold 58px sans-serif'; ctx.fillText('基地沦陷', cvs.width/2-145, cvs.height/2-20);
+        ctx.font='24px sans-serif'; ctx.fillText('按 R 键重新开始', cvs.width/2-96, cvs.height/2+28);
+      }
+    }
+
+    function uiUpdate(){
+      ui.baseHpText.textContent = `${Math.floor(state.baseHp)} / ${state.maxBaseHp}`;
+      ui.baseHpBar.style.width = `${Math.max(0,state.baseHp/state.maxBaseHp*100)}%`;
+      ui.goldText.textContent = Math.floor(state.gold);
+      ui.waveText.textContent = state.wave;
+      ui.killsText.textContent = state.kills;
+      const dps = ((state.scoreDamage - state.lastDpsSample)/1).toFixed(0);
+      state.lastDpsSample = state.scoreDamage;
+      ui.dpsText.textContent = dps;
+      ui.skillChip.textContent = `冲击波 CD: ${state.skill.cd.toFixed(1)}s`;
+      if(!state.over){
+        ui.stateChip.innerHTML = state.wave % 5 === 0 ? '<b class="warn">Boss 波次</b>' : '<b class="good">战斗中</b>';
+      }
+      renderUpgradeButtons();
+    }
+
+    let last=performance.now(), uiTick=0;
+    function loop(now){
+      const dt = Math.min(0.033,(now-last)/1000);
+      last = now;
+      update(dt);
+      draw();
+      uiTick += dt;
+      if(uiTick>1){ uiTick=0; uiUpdate(); }
+      requestAnimationFrame(loop);
+    }
+
+    cvs.addEventListener('mousemove',e=>{
+      const r=cvs.getBoundingClientRect();
+      state.mouse.x=(e.clientX-r.left)*(cvs.width/r.width);
+      state.mouse.y=(e.clientY-r.top)*(cvs.height/r.height);
+      state.player.x = state.mouse.x;
+      state.player.y = Math.min(cvs.height-34,Math.max(40,state.mouse.y));
+    });
+    cvs.addEventListener('mousedown',()=>state.mouse.down=true);
+    window.addEventListener('mouseup',()=>state.mouse.down=false);
+    window.addEventListener('keydown',e=>{
+      if(e.code==='Space'){ e.preventDefault(); blast(); }
+      if(e.key.toLowerCase()==='r' && state.over) location.reload();
+    });
+
+    spawnWave();
+    renderUpgradeButtons();
+    uiUpdate();
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
